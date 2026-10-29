@@ -14,7 +14,7 @@ A modern, dark Windows app for sending RCM payloads to a Nintendo Switch.
 ## Download
 
 Get the latest version from the [Releases](https://github.com/Labtoso/rcmmodern/releases) page.
-The zip contains the setup and `Install.bat`, which starts it (installs per user, no admin needed).
+Download `rcmmodern.exe` (setup) and `Install.bat`, put both in the same folder and run `Install.bat`. It installs per user, no admin needed.
 
 ## Build
 
