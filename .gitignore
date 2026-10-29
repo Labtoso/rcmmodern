@@ -5,3 +5,4 @@ installer/
 backend/
 *.user
 .vs/
+push/
