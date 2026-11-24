@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -13,6 +14,7 @@ namespace RcmGui
     internal sealed class SettingsOverlay : Panel
     {
         private const int PanelW = 300;
+        private const string ImprintUrl = "https://labtoso.de/impressum";
 
         private readonly Scrim _scrim = new Scrim();
         private readonly DBPanel _panel = new DBPanel();
@@ -27,6 +29,7 @@ namespace RcmGui
         private readonly ToolTip _tips = new ToolTip();
         private GearButton _gear;
         private Label _titleLbl, _autoLbl, _autoHint, _langLbl, _themeLbl;
+        private LinkLabel _imprint;
 
         public event Action Changed;
         public bool IsOpen { get; private set; }
@@ -84,7 +87,21 @@ namespace RcmGui
             _themeLbl = new Label { Font = Theme.Label, ForeColor = Theme.Muted, AutoSize = true, Location = new Point(20, 278) };
             BuildThemeSwatches(300);
 
-            _panel.Controls.AddRange(new Control[] { _gear, _titleLbl, _autoLbl, _auto, _autoHint, _langLbl, _themeLbl });
+            // Impressum ganz unten im Menue, oeffnet im Standardbrowser
+            _imprint = new LinkLabel
+            {
+                Text = "Impressum",
+                Font = Theme.Small,
+                AutoSize = true,
+                LinkBehavior = LinkBehavior.HoverUnderline,
+                Cursor = Cursors.Hand,
+            };
+            _imprint.LinkClicked += (s, e) => OpenExternal(ImprintUrl);
+            _tips.SetToolTip(_imprint, ImprintUrl);
+            _panel.Resize += (s, e) => PlaceImprint();
+
+            _panel.Controls.AddRange(new Control[] { _gear, _titleLbl, _autoLbl, _auto, _autoHint, _langLbl, _themeLbl, _imprint });
+            PlaceImprint();
 
             ApplyTexts();
             MarkSelection();
@@ -139,6 +156,23 @@ namespace RcmGui
             _themeLbl.Text = Strings.T("theme").ToUpperInvariant();
             _titleLbl.ForeColor = Theme.Text;
             foreach (var l in new[] { _autoLbl, _autoHint, _langLbl, _themeLbl }) l.ForeColor = Theme.Muted;
+            _imprint.LinkColor = Theme.Muted;
+            _imprint.VisitedLinkColor = Theme.Muted;
+            _imprint.ActiveLinkColor = Theme.Accent;
+        }
+
+        private void PlaceImprint()
+        {
+            // Unten links, gleicher Rand wie die uebrigen Eintraege; nie ueber die Theme-Auswahl schieben
+            var y = _panel.Height - _imprint.PreferredHeight - 16;
+            _imprint.Location = new Point(20, Math.Max(350, y));
+        }
+
+        private static void OpenExternal(string url)
+        {
+            // UseShellExecute -> Standardbrowser des Systems, das App-Fenster bleibt unberuehrt
+            try { Process.Start(new ProcessStartInfo(url) { UseShellExecute = true }); }
+            catch { /* kein Browser verfuegbar */ }
         }
 
         private void MarkSelection()
